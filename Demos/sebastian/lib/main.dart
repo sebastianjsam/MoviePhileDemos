@@ -1,8 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
+import 'package:moviephile/Models/ValidateDatos.dart';
+import 'package:moviephile/services/ConectApi.dart';
+import 'package:moviephile/utils/RoutesAPP.dart';
+import 'package:moviephile/utils/TextApp.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,7 +17,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'MoviePhile'),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => MyHomePage(
+              title: 'MoviePhile',
+              key: key,
+            ),
+        '/Login': (context) => secondPage(),
+      },
     );
   }
 }
@@ -31,92 +38,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var url = Uri.parse("https://api.thecatapi.com/v1/categories");
-  String textoMostrar = "Datos ***";
-  void _registrar() async {
-    final respuesta = await http.get(url);
+  final _nombre = TextEditingController(text: 'sebas');
+  final _apellidos = TextEditingController(text: 'seb');
+  final _nick = TextEditingController(text: 'seb');
+  final _correo = TextEditingController(text: '1prueba@gmail.com');
+  final _contrasena = TextEditingController(text: 'Aa124567_');
 
-    if (respuesta.statusCode == 200) {
-      textoMostrar = jsonDecode(respuesta.body).toString();
-    } else {
-      textoMostrar = "Error con la respuesta";
-    }
-  }
-
-  Future<String> RegisterUser(
-      String name, String email, String password) async {
-    print("registrar");
-    print(jsonEncode(
-        {'Name': name, 'Email': 'prueba5@gmail.com', 'Password': 'Aa124567_'}));
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:53865/api/Auth/Register'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({
-        'Name': 'Batman1',
-        'Email': 'prueba1gmail.com',
-        'Password': 'Aa124567_'
-      }),
-    );
-    Map<String, dynamic> user = jsonDecode(response.body);
-    print("****" + user.toString());
-    if (response.statusCode == 200) {
-      // If the server did return a 201 CREATED response,
-      // then parse the JSON.
-      //return Album.fromJson(jsonDecode(response.body));
-      print("xd");
-      print((response.body).toString());
-      var json = jsonDecode(response.body);
-
-      Map<String, dynamic> user = jsonDecode(response.body);
-      print(user);
-      print(user['errors']);
-      print("result " + user['result'].toString());
-
-      print("JsonDecode " + (jsonDecode(response.body)).toString());
-      setState(() {
-        if (user['result'] == false) {
-          textoMostrar = (user['errors']).toString();
-        } else {
-          textoMostrar = 'Registro Exitoso';
-        }
-      });
-
-      return (user['errors']).toString();
-    } else {
-      // If the server did not return a 201 CREATED response,
-      // then throw an exception.
-      //throw Exception('Failed');
-      //return "Failed ";
-
-      print("Failed" + response.statusCode.toString());
-      Map<String, dynamic> user = jsonDecode(response.body);
-      print(user);
-      print(user['errors']);
-
-      setState(() {
-        textoMostrar = 'Error' + user['errors'].toString();
-      });
-      return "Failed ";
-    }
-  }
-
-  Future<http.Response> registrarseBackend() {
-    return http.post(
-      Uri.https('https://192.168.0.19:44307/api/Auth/', 'Register'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        "Name": "Batman1",
-        "Email": "prueba1@gmail.com",
-        "Password": "Aa124567_"
-      }),
-    );
-  }
-
-  final myController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,63 +56,89 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               height: 100,
               width: 100,
-              child: Image(
-                  image: AssetImage(
-                'assets/images/avatar.png',
-              )),
+              child: Image(image: AssetImage(RoutesAPP.IMG_PERFIL_REGISTRAR)),
+            ),
+            Container(
+              padding: const EdgeInsets.all(10),
+              child: TextFormField(
+                controller: _nombre,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: TextApp.NAME_TEXT,
+                  errorText:
+                      ValidateDatos.isNameInvalid ? TextApp.INVALID_Name : null,
+                ),
+              ),
             ),
             Container(
               padding: const EdgeInsets.all(10),
               child: TextField(
-                  controller: myController,
+                  controller: _apellidos,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Nombres',
+                    labelText: TextApp.LASTNAME_TEXT,
+                    errorText: ValidateDatos.isLastNameInvalid
+                        ? TextApp.INVALID_LAST_NAME
+                        : null,
+                  )),
+            ),
+
+            Container(
+              padding: const EdgeInsets.all(10),
+              child: TextFormField(
+                  controller: _correo,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: TextApp.EMAIL_TEXT,
+                    errorText: ValidateDatos.isEmailInvalid
+                        ? TextApp.INVALID_EMAIL
+                        : null,
                   )),
             ),
             Container(
               padding: const EdgeInsets.all(10),
               child: TextField(
+                  controller: _contrasena,
                   decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'apellidos',
-              )),
+                    border: OutlineInputBorder(),
+                    labelText: TextApp.PASSWORD_TEXT,
+                    errorText: ValidateDatos.ispassWordInvalid
+                        ? TextApp.INVALID_PASSWORD
+                        : null,
+                  )),
             ),
-            Container(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                  decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Nick',
-              )),
-            ),
-            Container(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                  decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Correo',
-              )),
-            ),
-            Container(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                  decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'contraseña',
-              )),
-            ),
-            Text(textoMostrar),
+            //Text(textoMostrar),
             ElevatedButton(
-              onPressed: () {
-                //_registrar();
-                var r = RegisterUser(myController.text, 'seas', 'as');
+              onPressed: () async {
                 setState(() {
-                  //String futuro =
-                  //(RegisterUser('sebas', 'seas', 'as')).toString();
+                  ValidateDatos.isNameInvalid =
+                      ValidateDatos.validateName(_nombre.text);
+                  ValidateDatos.isLastNameInvalid =
+                      ValidateDatos.validateLastName(_apellidos.text);
+                  ValidateDatos.isEmailInvalid =
+                      ValidateDatos.validatemail(_correo.text);
 
-                  textoMostrar = textoMostrar;
+                  ValidateDatos.ispassWordInvalid =
+                      ValidateDatos.validatepass(_contrasena.text);
                 });
+
+                //_registrar();
+                if (ValidateDatos.Datevalided()) {
+                  final Map<String, dynamic> resgistroUSer =
+                      await ConnectionApi.RegisterUser(
+                    _nombre.text,
+                    _nick.text,
+                    _correo.text,
+                    _contrasena.text,
+                  );
+                  setState(() {
+                    ConnectionApi.Errores(resgistroUSer['errors'].toString());
+                  });
+
+                  if (resgistroUSer['errors'].toString() == 'null') {
+                    Navigator.pushNamed(context, '/Login');
+                  }
+                }
               },
               child: Text('Registrar'),
             ),
@@ -193,6 +146,37 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class secondPage extends StatelessWidget {
+  @override
+  Widget build(Object context) {
+    // TODO: implement build
+
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: Container(
+          child: Column(
+            children: [
+              Text(
+                'Registro Exitoso',
+                style: TextStyle(fontSize: 40),
+              ),
+              RaisedButton(
+                child: Text('Ir page 1'),
+                onPressed: () {
+                  Navigator.pop(
+                    context,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
